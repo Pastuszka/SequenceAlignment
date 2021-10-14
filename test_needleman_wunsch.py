@@ -1,4 +1,5 @@
 import unittest
+import needleman_wunsch
 
 
 class TestNeedlemanWunsch(unittest.TestCase):
