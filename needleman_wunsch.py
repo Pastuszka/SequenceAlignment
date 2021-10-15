@@ -1,5 +1,6 @@
 import numpy as np
 import sys
+import getopt
 
 
 class Alignment:
@@ -9,7 +10,26 @@ class Alignment:
         self.score = score
 
     def __str__(self):
-        pass
+        output = "\n"
+        output = output + f'SCORE = {self.score}'
+
+        for solution in self.solutions:
+            output = output + '\n'
+            output = output + solution[0] + '\n'
+            output = output + solution[1] + '\n'
+
+        return output
+
+
+def read_fasta_sequence(path):
+    sequence = ''
+    with open(path) as f:
+        for line in f:
+            if line[0] == '>':
+                continue
+            else:
+                sequence = sequence + line.strip()
+    return sequence
 
 
 class NeedlemanWunsch:
@@ -143,5 +163,46 @@ class NeedlemanWunsch:
             sys.exit(0)
 
 
+def main(argv):
+    file_a = ''
+    file_b = ''
+    config = ''
+    output_file = ''
+    try:
+        opts, args = getopt.getopt(argv, "a:b:c:o:", ["seqa=", "seqb=",
+                                                      "conf=", "ofile="])
+    except getopt.GetoptError:
+        print('needleman_wunsch.py -a <sequence1> -o <sequenceb> -c <config>'
+              ' -o <outputfile>')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-a", "--seqa"):
+            file_a = arg
+        elif opt in ("-b", "--seqb"):
+            file_b = arg
+        elif opt in ("-c", "--conf"):
+            config = arg
+        elif opt in ("-o", "--ofile"):
+            output_file = arg
+
+    if not file_a or not file_b:
+        print('Error: missing input file')
+        sys.exit(1)
+
+    seq_a = read_fasta_sequence(file_a)
+    seq_b = read_fasta_sequence(file_b)
+
+    solver = NeedlemanWunsch()
+    if config:
+        solver.load_config(config)
+
+    alignment = solver.align(seq_a, seq_b)
+    if output_file:
+        with open(output_file, 'w') as f:
+            print(alignment, file=f)
+    else:
+        print(alignment)
+
+
 if __name__ == "__main__":
-    pass
+    main(sys.argv[1:])
