@@ -3,10 +3,11 @@ import numpy as np
 
 class Alignment:
 
-    def __init__(self):
-        pass
+    def __init__(self, solutions, score):
+        self.solutions = solutions
+        self.score = score
 
-    def __repr__(self):
+    def __str__(self):
         pass
 
 
@@ -56,3 +57,56 @@ class NeedlemanWunsch:
                 alignment_matrix[i, j] = best_score
 
         return alignment_matrix, arrow_matrix
+
+    def __build_solutions__(self, alignment_matrix, arrow_matrix, seq_a, seq_b):
+
+        class SolutionBuilder:
+            def __init__(self, seq_a, seq_b, x, y):
+                self.seq_a = seq_a
+                self.seq_b = seq_b
+                self.x = x
+                self.y = y
+
+        n, m = alignment_matrix.shape
+
+        solution = SolutionBuilder('', '', m - 1, n - 1)
+        solution_stack = [solution]
+        final_solutions = []
+
+        while len(solution_stack) > 0:
+            solution = solution_stack.pop()
+
+            if solution.x == 0 and solution.y == 0:
+                final_solution = (solution.seq_a[::-1], solution.seq_b[::-1])
+                final_solutions.append(final_solution)
+                continue
+
+            if arrow_matrix[solution.y, solution.x, 0]:
+                new_solution = SolutionBuilder(solution.seq_a + '-',
+                                               solution.seq_b
+                                               + seq_b[solution.x - 1],
+                                               solution.x - 1,
+                                               solution.y)
+                solution_stack.append(new_solution)
+            if arrow_matrix[solution.y, solution.x, 1]:
+                new_solution = SolutionBuilder(solution.seq_a
+                                               + seq_a[solution.y - 1],
+                                               solution.seq_b + '-',
+                                               solution.x,
+                                               solution.y - 1)
+                solution_stack.append(new_solution)
+            if arrow_matrix[solution.y, solution.x, 2]:
+                new_solution = SolutionBuilder(solution.seq_a
+                                               + seq_a[solution.y - 1],
+                                               solution.seq_b
+                                               + seq_b[solution.x - 1],
+                                               solution.x - 1,
+                                               solution.y - 1)
+                solution_stack.append(new_solution)
+
+        return Alignment(final_solutions, alignment_matrix[n - 1, m - 1])
+
+    def align(self, seq_a, seq_b):
+        alignment_matrix, arrow_matrix = self.__align__(seq_a, seq_b)
+        return self.__build_solutions__(alignment_matrix, arrow_matrix,
+                                        seq_a, seq_b)
