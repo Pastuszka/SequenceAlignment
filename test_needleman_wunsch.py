@@ -56,6 +56,14 @@ class TestNeedlemanWunsch(unittest.TestCase):
 
         self.assertTrue(first_correct and second_correct)
 
+    def test_score(self):
+        seq_a = 'CGA'
+        seq_b = 'CACGA'
+        solver = NeedlemanWunsch()
+        alignment = solver.align(seq_a, seq_b)
+
+        self.assertTrue(alignment.score == 1)
+
 
 if __name__ == '__main__':
     unittest.main()
