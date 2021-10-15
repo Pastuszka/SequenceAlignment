@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 
 
 class Alignment:
@@ -15,7 +16,7 @@ class NeedlemanWunsch:
     GAP_PENALTY = -1
     SAME_AWARD = 1
     DIFFERENCE_PENALTY = 0
-    MAX_SEQ_LENGTH = 1000
+    MAX_SEQ_LENGTH = 500
 
     def __align__(self, seq_a, seq_b):
 
@@ -107,6 +108,40 @@ class NeedlemanWunsch:
         return Alignment(final_solutions, alignment_matrix[n - 1, m - 1])
 
     def align(self, seq_a, seq_b):
+
+        if max(len(seq_a), len(seq_b)) > self.MAX_SEQ_LENGTH:
+            print('Error: exceeded max sequence length')
+            sys.exit(0)
+
         alignment_matrix, arrow_matrix = self.__align__(seq_a, seq_b)
         return self.__build_solutions__(alignment_matrix, arrow_matrix,
                                         seq_a, seq_b)
+
+    def load_config(self, path):
+        try:
+            config = {}
+            with open(path) as f:
+                lines = f.readlines()
+                for line in lines:
+                    config_line = line.split('=')
+                    argument = config_line[0].strip().upper()
+                    config[argument] = config_line[1].strip()
+
+            self.GAP_PENALTY = float(config['GAP_PENALTY'])
+            self.SAME_AWARD = float(config['SAME_AWARD'])
+            self.DIFFERENCE_PENALTY = float(config['DIFFERENCE_PENALTY'])
+            self.MAX_SEQ_LENGTH = float(config['MAX_SEQ_LENGTH'])
+
+        except OSError:
+            print('Error: file ' + path + ' cannot be read')
+            sys.exit(0)
+        except KeyError:
+            print('Error: config file does not contain required arguments')
+            sys.exit(0)
+        except ValueError:
+            print('Error: config file contains incorrect values')
+            sys.exit(0)
+
+
+if __name__ == "__main__":
+    pass
