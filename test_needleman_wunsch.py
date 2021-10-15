@@ -64,6 +64,15 @@ class TestNeedlemanWunsch(unittest.TestCase):
 
         self.assertTrue(alignment.score == 1)
 
+    def test_load_config(self):
+        solver = NeedlemanWunsch()
+        solver.load_config('config.txt')
+
+        self.assertTrue(solver.GAP_PENALTY == -2 and
+                        solver.DIFFERENCE_PENALTY == 0 and
+                        solver.SAME_AWARD == 2 and
+                        solver.MAX_SEQ_LENGTH == 1000)
+
 
 if __name__ == '__main__':
     unittest.main()
