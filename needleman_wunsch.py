@@ -163,7 +163,7 @@ class NeedlemanWunsch:
             self.MAX_SEQ_LENGTH = float(config['MAX_SEQ_LENGTH'])
 
         except OSError:
-            print('Error: file ' + path + ' cannot be read')
+            print(f'Error: file {path} cannot be read')
             sys.exit(3)
         except KeyError:
             print('Error: config file does not contain required arguments')
