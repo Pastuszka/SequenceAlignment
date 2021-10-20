@@ -134,7 +134,7 @@ class NeedlemanWunsch:
 
         if max(len(seq_a), len(seq_b)) > self.MAX_SEQ_LENGTH:
             print('Error: exceeded max sequence length')
-            sys.exit(0)
+            sys.exit(6)
 
         alignment_matrix, arrow_matrix = self.__align__(seq_a, seq_b)
         return self.__build_solutions__(alignment_matrix, arrow_matrix,
@@ -157,13 +157,13 @@ class NeedlemanWunsch:
 
         except OSError:
             print('Error: file ' + path + ' cannot be read')
-            sys.exit(0)
+            sys.exit(3)
         except KeyError:
             print('Error: config file does not contain required arguments')
-            sys.exit(0)
+            sys.exit(4)
         except ValueError:
             print('Error: config file contains incorrect values')
-            sys.exit(0)
+            sys.exit(5)
 
 
 def main(argv: list[str]) -> None:
