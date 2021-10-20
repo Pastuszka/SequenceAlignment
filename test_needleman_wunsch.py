@@ -4,10 +4,6 @@ from needleman_wunsch import NeedlemanWunsch
 
 
 class TestNeedlemanWunsch(unittest.TestCase):
-    test_config = {'GAP_PENALTY': -1,
-                   'SAME_AWARD': 1,
-                   'DIFFERENCE_PENALTY': 0,
-                   'MAX_SEQ_LENGTH': 1000}
 
     def test_align(self):
         seq_a = 'CGA'
