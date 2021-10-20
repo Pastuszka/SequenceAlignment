@@ -10,7 +10,7 @@ class Alignment:
         self.score = score
 
     def __str__(self):
-        output = "\n"
+        output = ""
         output = output + f'SCORE = {self.score}'
 
         for solution in self.solutions:
@@ -195,6 +195,12 @@ def main(argv):
     solver = NeedlemanWunsch()
     if config:
         solver.load_config(config)
+    else:
+        print("No config provided, using defaults:")
+        print(f"GAP_PENALTY = {solver.GAP_PENALTY}")
+        print(f"SAME_AWARD = {solver.SAME_AWARD}")
+        print(f"DIFFERENCE_PENALTY = {solver.DIFFERENCE_PENALTY}")
+        print(f"MAX_SEQ_LENGTH = {solver.MAX_SEQ_LENGTH}")
 
     alignment = solver.align(seq_a, seq_b)
     if output_file:
