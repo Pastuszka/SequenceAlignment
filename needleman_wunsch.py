@@ -1,10 +1,11 @@
 import numpy as np
 import sys
 import getopt
+from dataclasses import dataclass
 
 
 class Alignment:
-
+    """Class representing final alignment result"""
     def __init__(self, solutions: list[tuple[str, str]], score: float):
         self.solutions = solutions
         self.score = score
@@ -22,6 +23,7 @@ class Alignment:
 
 
 def read_fasta_sequence(path: str) -> str:
+    """Return sequence from a fasta file"""
     sequence = ''
     with open(path) as f:
         for line in f:
@@ -33,13 +35,14 @@ def read_fasta_sequence(path: str) -> str:
 
 
 class NeedlemanWunsch:
+    """Implements the Needleman-Wunsch sequence alignment algorithm"""
     GAP_PENALTY = -1
     SAME_AWARD = 1
     DIFFERENCE_PENALTY = 0
     MAX_SEQ_LENGTH = 500
 
     def __align__(self, seq_a: str, seq_b: str) -> (np.ndarray, np.ndarray):
-
+        """Create alignment and arrow matrices based on two sequences"""
         len_a = len(seq_a)
         len_b = len(seq_b)
         alignment_matrix = np.empty((len_a + 1, len_b + 1))
@@ -79,17 +82,20 @@ class NeedlemanWunsch:
 
         return alignment_matrix, arrow_matrix
 
-    def __build_solutions__(self, alignment_matrix: np.ndarray,
+    @staticmethod
+    def __build_solutions__(alignment_matrix: np.ndarray,
                             arrow_matrix: np.ndarray,
                             seq_a: str,
                             seq_b: str) -> Alignment:
+        """Create solutions based on alignment and arrow matrices"""
 
+        @dataclass
         class SolutionBuilder:
-            def __init__(self, seq_a: str, seq_b: str, x: int, y: int) -> None:
-                self.seq_a = seq_a
-                self.seq_b = seq_b
-                self.x = x
-                self.y = y
+            """Utility class for creating solutions from alignment matrices"""
+            seq_a: str
+            seq_b: str
+            x: int
+            y: int
 
         n, m = alignment_matrix.shape
 
@@ -131,7 +137,7 @@ class NeedlemanWunsch:
         return Alignment(final_solutions, alignment_matrix[n - 1, m - 1])
 
     def align(self, seq_a: str, seq_b: str) -> Alignment:
-
+        """Find best alignments of two sequences"""
         if max(len(seq_a), len(seq_b)) > self.MAX_SEQ_LENGTH:
             print('Error: exceeded max sequence length')
             sys.exit(6)
@@ -141,6 +147,7 @@ class NeedlemanWunsch:
                                         seq_a, seq_b)
 
     def load_config(self, path: str) -> None:
+        """Load configuration from a file"""
         try:
             config = {}
             with open(path) as f:
