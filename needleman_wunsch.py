@@ -11,7 +11,7 @@ class Alignment:
 
     def __str__(self):
         output = ""
-        output = output + f'SCORE = {self.score}'
+        output = output + f'SCORE = {self.score}\n'
 
         for solution in self.solutions:
             output = output + '\n'
