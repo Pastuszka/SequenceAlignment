@@ -5,7 +5,7 @@ import getopt
 
 class Alignment:
 
-    def __init__(self, solutions, score):
+    def __init__(self, solutions: list[tuple[str, str]], score: float):
         self.solutions = solutions
         self.score = score
 
@@ -21,7 +21,7 @@ class Alignment:
         return output
 
 
-def read_fasta_sequence(path):
+def read_fasta_sequence(path: str) -> str:
     sequence = ''
     with open(path) as f:
         for line in f:
@@ -38,7 +38,7 @@ class NeedlemanWunsch:
     DIFFERENCE_PENALTY = 0
     MAX_SEQ_LENGTH = 500
 
-    def __align__(self, seq_a, seq_b):
+    def __align__(self, seq_a: str, seq_b: str) -> (np.ndarray, np.ndarray):
 
         len_a = len(seq_a)
         len_b = len(seq_b)
@@ -79,10 +79,13 @@ class NeedlemanWunsch:
 
         return alignment_matrix, arrow_matrix
 
-    def __build_solutions__(self, alignment_matrix, arrow_matrix, seq_a, seq_b):
+    def __build_solutions__(self, alignment_matrix: np.ndarray,
+                            arrow_matrix: np.ndarray,
+                            seq_a: str,
+                            seq_b: str) -> Alignment:
 
         class SolutionBuilder:
-            def __init__(self, seq_a, seq_b, x, y):
+            def __init__(self, seq_a: str, seq_b: str, x: int, y: int) -> None:
                 self.seq_a = seq_a
                 self.seq_b = seq_b
                 self.x = x
@@ -127,7 +130,7 @@ class NeedlemanWunsch:
 
         return Alignment(final_solutions, alignment_matrix[n - 1, m - 1])
 
-    def align(self, seq_a, seq_b):
+    def align(self, seq_a: str, seq_b: str) -> Alignment:
 
         if max(len(seq_a), len(seq_b)) > self.MAX_SEQ_LENGTH:
             print('Error: exceeded max sequence length')
@@ -137,7 +140,7 @@ class NeedlemanWunsch:
         return self.__build_solutions__(alignment_matrix, arrow_matrix,
                                         seq_a, seq_b)
 
-    def load_config(self, path):
+    def load_config(self, path: str) -> None:
         try:
             config = {}
             with open(path) as f:
@@ -163,7 +166,7 @@ class NeedlemanWunsch:
             sys.exit(0)
 
 
-def main(argv):
+def main(argv: list[str]) -> None:
     file_a = ''
     file_b = ''
     config = ''
