@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 class Alignment:
     """Class representing final alignment result"""
+
     def __init__(self, solutions: list[tuple[str, str]], score: float):
         self.solutions = solutions
         self.score = score
@@ -40,6 +41,7 @@ class NeedlemanWunsch:
     SAME_AWARD = 1
     DIFFERENCE_PENALTY = 0
     MAX_SEQ_LENGTH = 500
+    MAX_ALIGNMENTS = np.Inf
 
     def __align__(self, seq_a: str, seq_b: str) -> (np.ndarray, np.ndarray):
         """Create alignment and arrow matrices based on two sequences"""
@@ -51,12 +53,12 @@ class NeedlemanWunsch:
         alignment_matrix[0, 0] = 0
 
         for i in range(1, len_a + 1):
-            alignment_matrix[i, 0] = alignment_matrix[i - 1, 0]\
+            alignment_matrix[i, 0] = alignment_matrix[i - 1, 0] \
                                      + self.GAP_PENALTY
             arrow_matrix[i, 0, 1] = True
 
         for j in range(1, len_b + 1):
-            alignment_matrix[0, j] = alignment_matrix[0, j - 1]\
+            alignment_matrix[0, j] = alignment_matrix[0, j - 1] \
                                      + self.GAP_PENALTY
             arrow_matrix[0, j, 0] = True
 
@@ -66,7 +68,7 @@ class NeedlemanWunsch:
                 right_score = alignment_matrix[i, j - 1] + self.GAP_PENALTY
                 down_score = alignment_matrix[i - 1, j] + self.GAP_PENALTY
                 if seq_a[i - 1] == seq_b[j - 1]:
-                    diag_score = alignment_matrix[i - 1, j - 1]\
+                    diag_score = alignment_matrix[i - 1, j - 1] \
                                  + self.SAME_AWARD
                 else:
                     diag_score = alignment_matrix[i - 1, j - 1] \
@@ -82,8 +84,7 @@ class NeedlemanWunsch:
 
         return alignment_matrix, arrow_matrix
 
-    @staticmethod
-    def __build_solutions__(alignment_matrix: np.ndarray,
+    def __build_solutions__(self, alignment_matrix: np.ndarray,
                             arrow_matrix: np.ndarray,
                             seq_a: str,
                             seq_b: str) -> Alignment:
@@ -109,23 +110,31 @@ class NeedlemanWunsch:
             if solution.x == 0 and solution.y == 0:
                 final_solution = (solution.seq_a[::-1], solution.seq_b[::-1])
                 final_solutions.append(final_solution)
-                continue
+                if len(final_solutions) == self.MAX_ALIGNMENTS:
+                    break
+                else:
+                    continue
 
-            if arrow_matrix[solution.y, solution.x, 0]:
+            if arrow_matrix[solution.y, solution.x, 0] and \
+                    len(solution_stack) < self.MAX_ALIGNMENTS:
                 new_solution = SolutionBuilder(solution.seq_a + '-',
                                                solution.seq_b
                                                + seq_b[solution.x - 1],
                                                solution.x - 1,
                                                solution.y)
                 solution_stack.append(new_solution)
-            if arrow_matrix[solution.y, solution.x, 1]:
+
+            if arrow_matrix[solution.y, solution.x, 1] and \
+                    len(solution_stack) < self.MAX_ALIGNMENTS:
                 new_solution = SolutionBuilder(solution.seq_a
                                                + seq_a[solution.y - 1],
                                                solution.seq_b + '-',
                                                solution.x,
                                                solution.y - 1)
                 solution_stack.append(new_solution)
-            if arrow_matrix[solution.y, solution.x, 2]:
+
+            if arrow_matrix[solution.y, solution.x, 2] and \
+                    len(solution_stack) < self.MAX_ALIGNMENTS:
                 new_solution = SolutionBuilder(solution.seq_a
                                                + seq_a[solution.y - 1],
                                                solution.seq_b
@@ -161,6 +170,8 @@ class NeedlemanWunsch:
             self.SAME_AWARD = float(config['SAME_AWARD'])
             self.DIFFERENCE_PENALTY = float(config['DIFFERENCE_PENALTY'])
             self.MAX_SEQ_LENGTH = float(config['MAX_SEQ_LENGTH'])
+            if 'MAX_ALIGNMENTS' in config.keys():
+                self.MAX_ALIGNMENTS = float(config['MAX_ALIGNMENTS'])
 
         except OSError:
             print(f'Error: file {path} cannot be read')
@@ -211,6 +222,7 @@ def main(argv: list[str]) -> None:
         print(f"SAME_AWARD = {solver.SAME_AWARD}")
         print(f"DIFFERENCE_PENALTY = {solver.DIFFERENCE_PENALTY}")
         print(f"MAX_SEQ_LENGTH = {solver.MAX_SEQ_LENGTH}")
+        print(f"MAX_ALIGNMENTS = {solver.MAX_ALIGNMENTS}")
 
     alignment = solver.align(seq_a, seq_b)
     if output_file:
